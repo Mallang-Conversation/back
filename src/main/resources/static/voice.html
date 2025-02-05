@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>실시간 음성 스트리밍</title>
+</head>
+<body>
+<h1>실시간 음성 스트리밍 (WebSocket)</h1>
+<button id="startBtn">스트리밍 시작</button>
+<button id="stopBtn" disabled>스트리밍 중지</button>
+
+<script>
+  let mediaRecorder;
+  let ws;
+  let stream;
+
+  // 스트리밍 시작 버튼 클릭 시 처리
+  document.getElementById("startBtn").addEventListener("click", async () => {
+    // WebSocket 연결 생성
+    ws = new WebSocket("ws://localhost:8081/ws/voice");
+    ws.binaryType = "arraybuffer";
+
+    ws.onopen = async () => {
+      console.log("WebSocket 연결 성공");
+
+      // 마이크 접근 및 MediaRecorder 생성
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+
+        // MediaRecorder에서 청크가 생성될 때마다 호출
+        mediaRecorder.ondataavailable = async (event) => {
+          if (event.data && event.data.size > 0) {
+            // Blob 데이터를 ArrayBuffer로 변환 후 전송
+            const buffer = await event.data.arrayBuffer();
+            if (ws.readyState === WebSocket.OPEN) {
+              ws.send(buffer);
+              console.log("전송한 음성 데이터 크기:", buffer.byteLength, "바이트");
+            }
+          }
+        };
+
+        // 250ms 간격으로 음성 데이터를 캡처하여 전송 (필요에 따라 조정)
+        mediaRecorder.start(250);
+        console.log("MediaRecorder 시작");
+
+        // UI 버튼 상태 변경
+        document.getElementById("startBtn").disabled = true;
+        document.getElementById("stopBtn").disabled = false;
+      } catch (err) {
+        console.error("마이크 접근 에러:", err);
+      }
+    };
+
+    ws.onerror = (error) => {
+      console.error("WebSocket 에러:", error);
+    };
+
+    ws.onclose = () => {
+      console.log("WebSocket 연결 종료");
+    };
+  });
+
+  // 스트리밍 중지 버튼 클릭 시 처리
+  document.getElementById("stopBtn").addEventListener("click", () => {
+    if (mediaRecorder && mediaRecorder.state !== "inactive") {
+      mediaRecorder.stop();
+      console.log("MediaRecorder 중지");
+    }
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+    }
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.close();
+    }
+    // UI 버튼 상태 복원
+    document.getElementById("startBtn").disabled = false;
+    document.getElementById("stopBtn").disabled = true;
+  });
+</script>
+</body>
+</html>

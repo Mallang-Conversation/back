@@ -1,0 +1,13 @@
+server:
+  port: 8081  # 서버 포트 설정
+
+logging:
+  level:
+    root: INFO
+    org.springframework.web.socket: DEBUG
+    com.template: DEBUG
+
+cors:
+  allowed-origins: "*"
+  allowed-methods: GET, POST
+  allowed-headers: "*"
