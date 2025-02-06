@@ -6,10 +6,17 @@
 </head>
 <body>
 <h1>실시간 음성 스트리밍 (PCM 데이터 → WAV 파일 변환)</h1>
-<button id="startBtn">스트리밍 시작</button>
-<button id="stopBtn" disabled>스트리밍 중지</button>
+
+<!-- 대화 관련 버튼 -->
+<button id="conversationStartBtn">대화 시작</button>
+<button id="conversationEndBtn" disabled>대화 종료</button>
+<br><br>
+<!-- 녹음 관련 버튼 (웹소켓 연결되어야 활성화됨) -->
+<button id="recordStartBtn" disabled>녹음 시작</button>
+<button id="recordStopBtn" disabled>녹음 중지</button>
 
 <script>
+  // 웹소켓 및 오디오 관련 변수 선언
   let ws;
   let audioContext;
   let processor;
@@ -17,22 +24,53 @@
   let mediaStream;
   let audioDataBuffer = []; // Int16Array 조각들을 누적
 
-  // 시작 버튼 클릭 시: PCM 데이터를 추출하도록 설정
-  document.getElementById("startBtn").addEventListener("click", async () => {
-    // WebSocket 연결 생성 (원하는 경우 PCM 데이터 혹은 별도 WAV 파일 생성을 위해 서버 전송)
-    ws = new WebSocket("ws://localhost:8081/ws/voice");
+  // 버튼 요소
+  const conversationStartBtn = document.getElementById("conversationStartBtn");
+  const conversationEndBtn = document.getElementById("conversationEndBtn");
+  const recordStartBtn = document.getElementById("recordStartBtn");
+  const recordStopBtn = document.getElementById("recordStopBtn");
+
+  // 대화 시작 버튼 클릭: 웹소켓(ws://localhost:8081/ws/chat) 연결
+  conversationStartBtn.addEventListener("click", () => {
+    ws = new WebSocket("ws://localhost:8081/ws/chat");
     ws.binaryType = "arraybuffer";
     ws.onopen = () => {
-      console.log("WebSocket 연결 성공");
+      console.log("대화용 WebSocket 연결 성공");
+      // 대화 연결이 성공하면 녹음을 시작할 수 있도록 녹음 버튼 활성화
+      recordStartBtn.disabled = false;
     };
     ws.onerror = (err) => {
-      console.error("WebSocket 에러:", err);
+      console.error("대화용 WebSocket 에러:", err);
     };
     ws.onclose = () => {
-      console.log("WebSocket 연결 종료");
+      console.log("대화용 WebSocket 연결 종료");
+      // 연결이 끊기면 녹음 시작 버튼도 비활성화
+      recordStartBtn.disabled = true;
     };
 
-    // AudioContext 생성 및 마이크 스트림 요청
+    conversationStartBtn.disabled = true;
+    conversationEndBtn.disabled = false;
+  });
+
+  // 대화 종료 버튼 클릭: 웹소켓 연결 종료
+  conversationEndBtn.addEventListener("click", () => {
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.close();
+    }
+    conversationStartBtn.disabled = false;
+    conversationEndBtn.disabled = true;
+    // 녹음 중이 아니라면 녹음 시작 버튼도 비활성화
+    recordStartBtn.disabled = true;
+  });
+
+  // 녹음 시작 버튼 클릭: 마이크 접근 및 PCM 데이터 수집 시작
+  recordStartBtn.addEventListener("click", async () => {
+    // 웹소켓이 연결되어 있지 않으면 녹음을 시작하지 않음
+    if (!ws || ws.readyState !== WebSocket.OPEN) {
+      alert("대화가 연결되어 있어야 녹음을 시작할 수 있습니다.");
+      return;
+    }
+
     try {
       audioContext = new (window.AudioContext || window.webkitAudioContext)();
       mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -41,7 +79,7 @@
       // ScriptProcessorNode 생성 (버퍼 사이즈: 4096, 채널 수: 1)
       processor = audioContext.createScriptProcessor(4096, 1, 1);
       input.connect(processor);
-      // 프로세서 노드를 destination에 연결하면 브라우저에서 소리가 날 수 있으므로, 출력 없이 사용할 경우 연결하지 않아도 됩니다.
+      // processor를 destination에 연결하면 소리가 나므로 여기서는 연결하지 않습니다.
       processor.connect(audioContext.destination);
 
       processor.onaudioprocess = (e) => {
@@ -52,7 +90,7 @@
         // 누적 버퍼에 저장
         audioDataBuffer.push(pcmChunk);
 
-        // 만약 실시간 전송을 원한다면, WebSocket으로 현재 청크 전송 (raw PCM 데이터)
+        // 웹소켓을 통해 현재 청크 전송 (raw PCM 데이터)
         if (ws.readyState === WebSocket.OPEN) {
           ws.send(pcmChunk.buffer);
           console.log("전송한 PCM 데이터 크기:", pcmChunk.byteLength, "바이트");
@@ -60,27 +98,15 @@
       };
 
       console.log("PCM 데이터 수집 시작");
-      // UI 버튼 상태 업데이트
-      document.getElementById("startBtn").disabled = true;
-      document.getElementById("stopBtn").disabled = false;
+      recordStartBtn.disabled = true;
+      recordStopBtn.disabled = false;
     } catch (err) {
       console.error("마이크 접근 또는 AudioContext 생성 에러:", err);
     }
   });
 
-  // 정수 PCM(Int16Array)로 변환하는 함수
-  function floatTo16BitPCM(float32Array) {
-    const len = float32Array.length;
-    const int16Array = new Int16Array(len);
-    for (let i = 0; i < len; i++) {
-      let s = Math.max(-1, Math.min(1, float32Array[i])); // 클램핑
-      int16Array[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
-    }
-    return int16Array;
-  }
-
-  // 중지 버튼 클릭 시: 녹음을 중지하고 WAV 파일 생성
-  document.getElementById("stopBtn").addEventListener("click", () => {
+  // 녹음 중지 버튼 클릭: 녹음을 중지하고 WAV 파일 생성 후 다운로드
+  recordStopBtn.addEventListener("click", () => {
     // ScriptProcessorNode 및 AudioContext 정리
     if (processor) {
       processor.disconnect();
@@ -94,9 +120,6 @@
     }
     if (mediaStream) {
       mediaStream.getTracks().forEach(track => track.stop());
-    }
-    if (ws && ws.readyState === WebSocket.OPEN) {
-      ws.close();
     }
 
     // 누적된 PCM 데이터를 하나의 Int16Array로 병합
@@ -115,11 +138,22 @@
     a.click();
     window.URL.revokeObjectURL(url);
 
-    // 초기화
+    // 녹음 데이터 버퍼 초기화 및 버튼 상태 업데이트
     audioDataBuffer = [];
-    document.getElementById("startBtn").disabled = false;
-    document.getElementById("stopBtn").disabled = true;
+    recordStartBtn.disabled = false;
+    recordStopBtn.disabled = true;
   });
+
+  // Float32Array 데이터를 Int16Array (PCM 데이터)로 변환하는 함수
+  function floatTo16BitPCM(float32Array) {
+    const len = float32Array.length;
+    const int16Array = new Int16Array(len);
+    for (let i = 0; i < len; i++) {
+      let s = Math.max(-1, Math.min(1, float32Array[i])); // 클램핑
+      int16Array[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+    }
+    return int16Array;
+  }
 
   // 누적된 Int16Array 조각들을 하나로 합치는 함수
   function mergeBuffers(buffers) {
