@@ -54,7 +54,7 @@ public class ChatGptWhisperService implements SttService{
     }
 
     @Data
-    private class ApiRepose{
+    private static class ApiRepose{
         private String text;
     }
 }
