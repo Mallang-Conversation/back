@@ -1,6 +1,7 @@
-package com.template.voicechat.global.chat;
+package com.template.voicechat.chat;
 
 import io.netty.util.internal.ConcurrentSet;
+import java.io.IOException;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -14,14 +15,17 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 
 
     @Override
-    public void afterConnectionEstablished(WebSocketSession session){
+    public void afterConnectionEstablished(WebSocketSession session) throws IOException {
         log.info("새로운 WebSocket 연결 수립: {}", session.getId());
         sessionBuffers.add(session.getId());
+        session.sendMessage(new TextMessage("SESSION_ID:" + session.getId()));
     }
 
     @Override
-    protected void handleTextMessage(WebSocketSession session, TextMessage message) {
+    protected void handleTextMessage(WebSocketSession session, TextMessage message)
+        throws IOException {
         log.info("WebSocket 메시지 수신: {} (메시지: {})", session.getId(), message.getPayload());
+        session.sendMessage(new TextMessage("RECEIVED:" + message.getPayload()));
     }
 
     @Override

@@ -1,6 +1,6 @@
 package com.template.voicechat.global.config;
 
-import com.template.voicechat.global.chat.*;
+import com.template.voicechat.chat.ChatWebSocketHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.*;
