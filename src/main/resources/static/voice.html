@@ -2,10 +2,10 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>실시간 음성 스트리밍 (PCM → WAV)</title>
+  <title>실시간 음성 대화</title>
 </head>
 <body>
-<h1>실시간 음성 스트리밍 (PCM 데이터 → WAV 파일 변환)</h1>
+<h1>실시간 음성 대화</h1>
 
 <!-- 대화 관련 버튼 -->
 <button id="conversationStartBtn">대화 시작</button>
@@ -38,6 +38,13 @@
       console.log("대화용 WebSocket 연결 성공");
       // 대화 연결이 성공하면 녹음을 시작할 수 있도록 녹음 버튼 활성화
       recordStartBtn.disabled = false;
+    };
+    ws.onmessage = (event) => {
+      if (event.data.startsWith("SESSION_ID:")) {
+        const sessionId = event.data.split(":")[1]; // 세션 ID 추출
+        console.log("세션 ID:", sessionId);
+        window.sessionId = sessionId; // 전역 변수로 저장
+      }
     };
     ws.onerror = (err) => {
       console.error("대화용 WebSocket 에러:", err);
@@ -133,7 +140,7 @@
     const a = document.createElement("a");
     a.style.display = "none";
     a.href = url;
-    a.download = "recorded.wav";
+    a.download = `${window.sessionId}.wav`;
     document.body.appendChild(a);
     a.click();
     window.URL.revokeObjectURL(url);
