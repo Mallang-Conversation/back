@@ -1,6 +1,12 @@
 server:
   port: 8081  # 서버 포트 설정
 
+spring:
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+
 logging:
   level:
     root: INFO
@@ -11,3 +17,8 @@ cors:
   allowed-origins: "*"
   allowed-methods: GET, POST
   allowed-headers: "*"
+
+
+openai:
+  key: #API-KEY
+  url: https://api.openai.com
