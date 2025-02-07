@@ -22,3 +22,4 @@ cors:
 openai:
   key: #API-KEY
   url: https://api.openai.com
+  text-model: #text-generator-model
