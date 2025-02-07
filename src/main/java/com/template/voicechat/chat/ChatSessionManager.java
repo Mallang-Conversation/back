@@ -1,22 +1,27 @@
 package com.template.voicechat.chat;
 
-import java.util.Set;
+import com.template.voicechat.text.ChatMessage;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ChatSessionManager {
-    private final Set<String> sessionIds = ConcurrentHashMap.newKeySet();
+    private final Map<String,List<ChatMessage>> sessionMap = new ConcurrentHashMap<>();
 
-    public void add(String sessionId) {
-        sessionIds.add(sessionId);
+    public void add(String sessionId, List<ChatMessage> messages) {
+        sessionMap.put(sessionId, messages);
     }
 
     public void remove(String sessionId) {
-        sessionIds.remove(sessionId);
+        sessionMap.remove(sessionId);
     }
 
     public boolean contains(String sessionId) {
-        return sessionIds.contains(sessionId);
+        return sessionMap.containsKey(sessionId);
+    }
+
+    public List<ChatMessage> getMessages(String sessionId) {
+        return sessionMap.get(sessionId);
     }
 }
