@@ -13,10 +13,10 @@ public class ChatGptTextGenerationService implements TextGenerationService {
 
     public ChatGptTextGenerationService(
         @Value("${openai.key}") String apiKey,
-        @Value("${openai.url}") String apiUrl,
-        @Value("${openai.text-model}") String model) {
+        @Value("${openai.text-generator.url}") String url,
+        @Value("${openai.text-generator.model}") String model) {
         webClient = WebClient.builder()
-            .baseUrl(apiUrl+"/v1/chat/completions")
+            .baseUrl(url)
             .defaultHeader("Authorization", "Bearer " + apiKey)
             .build();
         this.model = model;

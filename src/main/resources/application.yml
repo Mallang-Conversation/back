@@ -21,5 +21,8 @@ cors:
 
 openai:
   key: #API-KEY
-  url: https://api.openai.com
-  text-model: #text-generator-model
+  stt:
+    url: https://api.openai.com/v1/audio/transcriptions
+  text-generator:
+    url: https://api.openai.com/v1/chat/completions
+    model: #text-generator-model

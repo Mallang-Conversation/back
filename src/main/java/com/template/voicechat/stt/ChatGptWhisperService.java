@@ -17,9 +17,9 @@ public class ChatGptWhisperService implements SttService{
 
     public ChatGptWhisperService(
         @Value("${openai.key}") String apiKey,
-        @Value("${openai.url}") String apiUrl) {
+        @Value("${openai.stt.url}") String url) {
         webClient = WebClient.builder()
-            .baseUrl(apiUrl+"/v1/audio/transcriptions")
+            .baseUrl(url)
             .defaultHeader("Authorization", "Bearer " + apiKey)
             .build();
 
