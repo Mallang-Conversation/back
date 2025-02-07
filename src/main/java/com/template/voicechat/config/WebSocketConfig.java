@@ -1,4 +1,4 @@
-package com.template.voicechat.global.config;
+package com.template.voicechat.config;
 
 import com.template.voicechat.chat.ChatWebSocketHandler;
 import lombok.RequiredArgsConstructor;

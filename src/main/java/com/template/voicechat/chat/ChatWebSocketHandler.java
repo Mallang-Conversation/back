@@ -1,23 +1,22 @@
 package com.template.voicechat.chat;
 
-import io.netty.util.internal.ConcurrentSet;
 import java.io.IOException;
-import java.util.Set;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 @Component
+@RequiredArgsConstructor
 @Slf4j
 public class ChatWebSocketHandler extends TextWebSocketHandler {
-    private final Set<String> sessionBuffers = new ConcurrentSet<>();
-
+    private final ChatSessionManager sessionManager;
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws IOException {
         log.info("새로운 WebSocket 연결 수립: {}", session.getId());
-        sessionBuffers.add(session.getId());
+        sessionManager.add(session.getId());
         session.sendMessage(new TextMessage("SESSION_ID:" + session.getId()));
     }
 
@@ -31,6 +30,6 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status){
         log.info("WebSocket 연결 종료: {} (상태: {})", session.getId(), status);
-        sessionBuffers.remove(session.getId());
+        sessionManager.remove(session.getId());
     }
 }

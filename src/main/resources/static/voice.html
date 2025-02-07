@@ -146,13 +146,34 @@
     const mergedPCM = mergeBuffers(audioDataBuffer);
     const wavBlob = createWavBlob(mergedPCM, 44100, 1, 16);
 
-    const url = URL.createObjectURL(wavBlob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${window.sessionId}.wav`;
-    document.body.appendChild(a);
-    a.click();
-    window.URL.revokeObjectURL(url);
+    const formData = new FormData();
+    formData.append("file", wavBlob, `${window.sessionId}.wav`);
+
+    fetch("http://localhost:8081/api/v1/audio", {
+      method: "POST",
+      body: formData,
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error("서버 응답 오류: " + response.status);
+      }
+      return response.text().then(text => {
+        try {
+          return text ? JSON.parse(text) : {};
+        } catch (e) {
+          return text;
+        }
+      });
+    })
+    .then(data => {
+      console.log("서버 응답:", data);
+      messageInput.value = data;
+      sendMessageBtn.click();
+    })
+    .catch(error => {
+      console.error("오디오 전송 오류:", error);
+    });
+
 
     audioDataBuffer = [];
     recordStartBtn.disabled = false;
