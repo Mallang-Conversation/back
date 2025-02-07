@@ -61,6 +61,7 @@
         window.sessionId = sessionId;
       } else {
         displayMessage("서버: " + data);
+        speak(data);
       }
     };
 
@@ -230,6 +231,15 @@
   function writeString(view, offset, string) {
     for (let i = 0; i < string.length; i++) {
       view.setUint8(offset + i, string.charCodeAt(i));
+    }
+  }
+
+  function speak(text) {
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      speechSynthesis.speak(utterance);
+    } else {
+      console.error("이 브라우저는 TTS를 지원하지 않습니다.");
     }
   }
 </script>
