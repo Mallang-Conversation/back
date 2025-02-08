@@ -1,5 +1,6 @@
 package com.template.voicechat.chat;
 
+import com.template.voicechat.game.*;
 import com.template.voicechat.text.*;
 import java.util.*;
 import lombok.RequiredArgsConstructor;
@@ -11,9 +12,9 @@ public class ChatService {
   private final ChatSessionManager sessionManager;
   private final TextGenerationService textGenerationService;
 
-  public void startChat(String sessionId) {
-    List<ChatMessage> messages = new ArrayList<>();
-    messages.add(new ChatMessage("assistant", "You are a helpful assistant"));
+  public void startChat(String sessionId, GameType gameType) {
+    List<ChatMessage> messages = new ArrayList<>(
+        ChatGameStrategyFactory.getStrategy(gameType).initializeChat());
     sessionManager.add(sessionId, messages);
   }
 

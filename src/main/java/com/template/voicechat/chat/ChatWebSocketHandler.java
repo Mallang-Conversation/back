@@ -1,8 +1,7 @@
 package com.template.voicechat.chat;
 
-import com.template.voicechat.text.*;
+import com.template.voicechat.game.GameType;
 import java.io.IOException;
-import java.util.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -19,7 +18,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     public void afterConnectionEstablished(WebSocketSession session) throws IOException {
         log.info("새로운 WebSocket 연결 수립: {}", session.getId());
         session.sendMessage(new TextMessage("SESSION_ID:" + session.getId()));
-        chatService.startChat(session.getId());
+        chatService.startChat(session.getId(), GameType.WORD_CHAIN);
     }
 
     @Override
