@@ -10,7 +10,7 @@ public abstract class AbstractChatGameStrategy implements ChatGameStrategy {
   public List<ChatMessage> initializeChat() {
     List<ChatMessage> messages = new ArrayList<>();
     messages.add(getCommonPrompt());
-    messages.add(getGameMessages());
+    messages.add(getGamePrompt());
     return messages;
   }
 
@@ -19,5 +19,5 @@ public abstract class AbstractChatGameStrategy implements ChatGameStrategy {
     return new ChatMessage("assistant", content);
   }
 
-  protected abstract ChatMessage getGameMessages();
+  protected abstract ChatMessage getGamePrompt();
 }
