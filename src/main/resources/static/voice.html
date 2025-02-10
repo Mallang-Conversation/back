@@ -12,6 +12,15 @@
 <button id="conversationEndBtn" disabled>대화 종료</button>
 <br><br>
 
+<!-- 게임 선택 select box 추가 -->
+<label for="gameSelect">게임 선택:</label>
+<select id="gameSelect">
+  <option value="WORD_CHAIN">끝말잇기</option>
+  <option value="TWENTY_QUESTIONS">스무고개</option>
+  <option value="FIVE_LETTERS">다섯글자 대화</option>
+</select>
+<br><br>
+
 <!-- 대화 입력 및 전송 -->
 <input type="text" id="messageInput" placeholder="메시지를 입력하세요" disabled>
 <button id="sendMessageBtn" disabled>전송</button>
@@ -40,9 +49,14 @@
   const messageInput = document.getElementById("messageInput");
   const sendMessageBtn = document.getElementById("sendMessageBtn");
   const chatLog = document.getElementById("chatLog");
+  const gameSelect = document.getElementById("gameSelect");
 
   conversationStartBtn.addEventListener("click", () => {
-    ws = new WebSocket("ws://localhost:8081/ws/chat");
+    // 선택된 게임 유형 읽기 (끝말잇기, 스무고개, 다섯글자 대화)
+    const gameType = gameSelect.value;
+    // query parameter를 포함한 WebSocket URL 생성
+    const wsUrl = "ws://localhost:8081/ws/chat?game=" + encodeURIComponent(gameType);
+    ws = new WebSocket(wsUrl);
     ws.binaryType = "arraybuffer";
 
     ws.onopen = () => {
@@ -54,7 +68,6 @@
 
     ws.onmessage = (event) => {
       const data = event.data;
-
       if (data.startsWith("SESSION_ID:")) {
         const sessionId = data.split(":")[1];
         console.log("세션 ID:", sessionId);
@@ -93,7 +106,7 @@
 
   messageInput.addEventListener("keyup", (event) => {
     if (event.key === "Enter") {
-      event.preventDefault(); // 폼 제출 방지
+      event.preventDefault();
       sendMessageBtn.click();
     }
   });
@@ -103,7 +116,7 @@
     if (message && ws.readyState === WebSocket.OPEN) {
       ws.send(message);
       displayMessage("나: " + message);
-      messageInput.value = ""; // 입력창 초기화
+      messageInput.value = "";
     }
   });
 
@@ -111,7 +124,7 @@
     const messageElement = document.createElement("div");
     messageElement.textContent = text;
     chatLog.appendChild(messageElement);
-    chatLog.scrollTop = chatLog.scrollHeight; // 최신 메시지로 스크롤 이동
+    chatLog.scrollTop = chatLog.scrollHeight;
   }
 
   recordStartBtn.addEventListener("click", async () => {
@@ -181,7 +194,6 @@
     .catch(error => {
       console.error("오디오 전송 오류:", error);
     });
-
 
     audioDataBuffer = [];
     recordStartBtn.disabled = false;
