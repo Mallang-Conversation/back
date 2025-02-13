@@ -7,11 +7,6 @@
 <body>
 <h1>실시간 음성 대화</h1>
 
-<!-- 대화 관련 버튼 -->
-<button id="conversationStartBtn">대화 시작</button>
-<button id="conversationEndBtn" disabled>대화 종료</button>
-<br><br>
-
 <!-- 게임 선택 select box 추가 -->
 <label for="gameSelect">게임 선택:</label>
 <select id="gameSelect">
@@ -19,6 +14,11 @@
   <option value="TWENTY_QUESTIONS">스무고개</option>
   <option value="FIVE_LETTERS">다섯글자 대화</option>
 </select>
+<br><br>
+
+<!-- 대화 관련 버튼 -->
+<button id="conversationStartBtn">대화 시작</button>
+<button id="conversationEndBtn" disabled>대화 종료</button>
 <br><br>
 
 <!-- 대화 입력 및 전송 -->
@@ -91,6 +91,7 @@
 
     conversationStartBtn.disabled = true;
     conversationEndBtn.disabled = false;
+    gameSelect.disabled = true; // 게임 선택 비활성화 추가
   });
 
   conversationEndBtn.addEventListener("click", () => {
@@ -102,6 +103,7 @@
     recordStartBtn.disabled = true;
     messageInput.disabled = true;
     sendMessageBtn.disabled = true;
+    gameSelect.disabled = false;
   });
 
   messageInput.addEventListener("keyup", (event) => {
