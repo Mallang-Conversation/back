@@ -81,6 +81,92 @@
 
 ---
 
+## 🤞 사용 방법
+
+### 1. 프로젝트 실행 전 설정
+프로젝트를 시작하기 전에 `resources/application.yml` 파일을 열어 OpenAI 관련 설정을 추가해야 합니다.
+아래는 예시 구성입니다.
+
+```yaml
+openai:
+  key: #API-KEY (예: sk-xxxxxxxxxxxxxxxxxxxx)
+  stt:
+    url: https://api.openai.com/v1/audio/transcriptions
+  text-generator:
+    url: https://api.openai.com/v1/chat/completions
+    model: #text-generator-model (예: gpt-3.5-turbo)
+```
+
+- `openai.key`: OpenAI API 키를 입력합니다.
+- `openai.text-generator.model`: 사용할 텍스트 생성 모델명을 지정합니다.
+모델 종류는 https://platform.openai.com/docs/pricing 에서 확인할 수 있습니다.
+<br><br>
+
+### 2. 프로젝트 실행 방법
+이 프로젝트는 Java Spring Boot와 Gradle로 구성되어 있습니다.
+실행하는 방법은 다음과 같습니다.
+
+**프로젝트 클론**
+```bash
+git clone https://github.com/SongHae8640/java-spring-real-time-conversation-with-ai.git
+```
+
+**프로젝트 디렉터리로 이동**
+```bash
+cd java-spring-real-time-conversation-with-ai
+```
+
+**의존성 설치 및 빌드**
+```bash
+./gradlew build
+```
+- Windows 환경에서는 `gradlew.bat build` 명령을 사용합니다.
+
+**프로젝트 실행**
+```bash
+./gradlew bootRun
+```
+- 또는 IDE(Spring Tools, IntelliJ 등)에서 메인 클래스를 직접 실행해도 됩니다.
+<br><br>
+
+### 3. 사이트 접속 방법
+프로젝트가 정상적으로 실행되면, 브라우저에서 다음 주소로 접속합니다.
+```bash
+http://localhost:8081/voice.html
+```
+
+접속 시 아래와 같은 실시간 음성 대화 화면이 표시됩니다.
+<br><br>
+
+### 4. 사용 방법
+**1) 게임 선택**
+- 화면 상단의 게임 선택 드롭다운에서 원하는 게임을 선택합니다.
+
+**2) 대화 시작**
+- `대화 시작` 버튼을 누르면 선택한 게임으로 AI와 실시간 대화를 시작할 수 있습니다.
+
+**3) 음성 입력**
+- `녹음 시작` 버튼을 클릭하면 마이크로 사용자의 음성을 녹음합니다.
+- 말을 마친 뒤 `녹음 중지` 버튼을 누르면, 녹음된 음성이 텍스트로 변환되어 채팅 창에 표시됩니다.
+
+**4) AI 응답**
+- 변환된 텍스트를 기반으로 AI가 대답을 생성하여 채팅창에 표시합니다.
+- 동시에 TTS(Text-to-Speech)를 통해 음성으로도 재생됩니다.
+
+**5) 텍스트 직접 입력**
+- 필요하다면, 직접 메시지를 입력한 후 `전송` 버튼을 누를 수도 있습니다.
+
+**6) 게임 전환**
+- 다른 게임을 하고 싶다면, `대화 종료` 버튼으로 현재 대화를 종료한 뒤
+- 다시 `게임 선택` 드롭다운에서 게임을 변경하고 `대화 시작`을 누르면 됩니다.
+
+이 과정을 통해, 사용자는 음성 또는 텍스트로 자유롭게 AI와 대화할 수 있습니다.
+
+<p>
+  <img src="https://github.com/SongHae8640/java-spring-real-time-conversation-with-ai/blob/master/run.gif">
+</p>
+---
+
 ## 🙌 문의
 - **개발자:** [송해]
 - **문의:** thdgo456@gmail.com
