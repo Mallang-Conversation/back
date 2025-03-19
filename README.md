@@ -89,12 +89,12 @@
 
 ```yaml
 openai:
-  key: #API-KEY (예: sk-xxxxxxxxxxxxxxxxxxxx)
+  key: ${OPENAI_KEY} #예: sk-xxxxxxxxxxxxxxxxxxxx
   stt:
     url: https://api.openai.com/v1/audio/transcriptions
   text-generator:
     url: https://api.openai.com/v1/chat/completions
-    model: #text-generator-model (예: gpt-3.5-turbo)
+    model: ${TEXT_GENERATOR_MODEL} #예: gpt-3.5-turbo
 ```
 
 - `openai.key`: OpenAI API 키를 입력합니다.
@@ -108,12 +108,12 @@ openai:
 
 **프로젝트 클론**
 ```bash
-git clone https://github.com/SongHae8640/java-spring-real-time-conversation-with-ai.git
+git clone https://github.com/Mallang-Conversation/back.git
 ```
 
 **프로젝트 디렉터리로 이동**
 ```bash
-cd java-spring-real-time-conversation-with-ai
+cd back
 ```
 
 **의존성 설치 및 빌드**
@@ -126,6 +126,13 @@ cd java-spring-real-time-conversation-with-ai
 ```bash
 ./gradlew bootRun
 ```
+
+**도커 사용 시**
+```bash
+docker pull songhae/mallang-back
+docker run -p 8081:8081 -e OPENAI_KEY={OPENAI_KEY}  -e TEXT_GENERATOR_MODEL={TEXT_GENERATOR_MODEL} --name conversation-with-ai songhae/mallang-back
+```
+
 - 또는 IDE(Spring Tools, IntelliJ 등)에서 메인 클래스를 직접 실행해도 됩니다.
 <br><br>
 
@@ -163,7 +170,7 @@ http://localhost:8081/voice.html
 이 과정을 통해, 사용자는 음성 또는 텍스트로 자유롭게 AI와 대화할 수 있습니다.
 
 <p>
-  <img src="https://github.com/SongHae8640/java-spring-real-time-conversation-with-ai/blob/master/run.gif">
+  <img src="https://github.com/Mallang-Conversation/back/blob/master/run.gif">
 </p>
 
 ---

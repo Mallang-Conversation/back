@@ -20,9 +20,9 @@ cors:
 
 
 openai:
-  key: #API-KEY
+  key: ${OPENAI_KEY}
   stt:
     url: https://api.openai.com/v1/audio/transcriptions
   text-generator:
     url: https://api.openai.com/v1/chat/completions
-    model: #text-generator-model
+    model: ${TEXT_GENERATOR_MODEL}
