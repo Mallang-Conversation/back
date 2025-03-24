@@ -170,7 +170,7 @@
     const wavBlob = createWavBlob(mergedPCM, 44100, 1, 16);
 
     const formData = new FormData();
-    formData.append("file", wavBlob, `${window.sessionId}.wav`);
+    formData.append("file", wavBlob, `audio.wav`);
 
     fetch("http://localhost:8081/api/v1/audio", {
       method: "POST",

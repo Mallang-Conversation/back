@@ -17,7 +17,6 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws IOException {
         log.info("새로운 WebSocket 연결 수립: {}", session.getId());
-        session.sendMessage(new TextMessage("SESSION_ID:" + session.getId()));
         chatService.startChat(session.getId(), getGameType(session));
     }
 
