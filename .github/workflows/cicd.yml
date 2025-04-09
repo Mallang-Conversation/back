@@ -45,3 +45,51 @@ jobs:
 
       - name: Push Docker image (latest)
         run: docker push songhae/mallang-back:latest
+
+  deploy:
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH to server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            cd /home/ubuntu/mallang
+            docker pull songhae/mallang-back:latest
+            docker run -d -p 8081:8081 --name mallang-back -e OPENAI_KEY=${{OPENAI_KEY}}  -e TEXT_GENERATOR_MODEL=gpt-3.5-turbo songhae/mallang-back 
+            docker image prune -af
+
+      - name: Health Check
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            echo "== Health check 시작 =="
+            start_time=$(date +%s)
+            for i in {1..300}
+            do
+              response=$(curl -s http://localhost:8081/actuator/health || true)
+              if echo "$response" | grep -q "\"UP\""; then
+                end_time=$(date +%s)
+                duration=$(( end_time - start_time ))
+                echo "서버 기동이 확인되었습니다!"
+                echo "총 소요 시간: ${duration}초"
+                exit 0
+              fi
+            
+              # 10초마다 진행 중 메시지 출력
+              if [ $(( i % 10 )) -eq 0 ]; then
+                echo "서버가 아직 기동되지 않았습니다. (${i}초 경과) 계속 헬스 체크 중..."
+              fi
+            
+              sleep 1
+            done
+            echo "서버가 정상 기동되지 않았습니다. 스크립트를 종료합니다."
+            exit 1
