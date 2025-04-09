@@ -60,6 +60,8 @@ jobs:
           script: |
             cd /home/ubuntu/mallang
             docker pull songhae/mallang-back:latest
+            docker stop mallang-back || true
+            docker rm mallang-back || true
             docker run -d -p 8081:8081 --name mallang-back -e OPENAI_KEY=${{OPENAI_KEY}}  -e TEXT_GENERATOR_MODEL=gpt-3.5-turbo songhae/mallang-back 
             docker image prune -af
 
